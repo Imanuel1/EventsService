@@ -5,6 +5,7 @@ import { kafkaInit } from "./kafka/kafka";
 import { requestLog } from "./middleware/requestLog";
 import router from "./routes/router";
 import { errorHandler } from "./middleware/errorHandler";
+import { pollingRequestsSetUp } from "./middleware/pollingRequest";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app
   .use("/api", router)
   .use(errorHandler)
   .listen(port, () => {
+    pollingRequestsSetUp();
     kafkaInit().catch(console.error);
     console.log(`Server is running op port ${port}`);
   });
