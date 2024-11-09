@@ -3,6 +3,9 @@ import { v4 as uuidv4 } from "uuid";
 import { eventTopic1, eventTopic2, hostIp, kafkaBrokers } from "../environment";
 import ConsumerFactory from "./kafkaConsumer";
 import ProducerFactory from "./kafkaProducer";
+import { updateRedisData } from "../redis/redis";
+import { parseEventMessage } from "../utils/utils";
+import { GeneralEventSource } from "../types/generalEvent.type";
 
 export const kafka = new Kafka({
   logLevel: logLevel.INFO,
@@ -15,6 +18,7 @@ export const kafkaInit = async () => {
   const producer = new ProducerFactory();
 
   //start consumers
+  // event type - GeneralEventSource.ALERT_COMPANY
   await consumer.startConsumer(
     eventTopic1,
     async (payload: EachMessagePayload) => {
@@ -22,7 +26,15 @@ export const kafkaInit = async () => {
       const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`;
       console.log(`- ${prefix} ${message.key}#${message.value}`);
 
-      //update Redis
+      if (!message.value) return; // not save the data if empty
+
+      //parse event data to general structure!!
+      const { eventId, stringifyEvent } = parseEventMessage[
+        GeneralEventSource.ALERT_COMPANY
+      ](message.value.toString());
+
+      //update Redis - key define by this logic - <subject>:<subjectId>
+      updateRedisData(`event:${eventId}`, stringifyEvent);
       //update mongoDb
     }
   );
@@ -34,7 +46,16 @@ export const kafkaInit = async () => {
       const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`;
       console.log(`- ${prefix} ${message.key}#${message.value}`);
 
+      if (!message.value) return; // not save the data if empty
+
+      //parse event data to general structure!!
+      const { eventId, stringifyEvent } = parseEventMessage[
+        GeneralEventSource.ROCKET_COMPANY
+      ](message.value.toString());
+
       //update Redis
+      updateRedisData(`event:${eventId}`, stringifyEvent);
+
       //update mongoDb
     }
   );

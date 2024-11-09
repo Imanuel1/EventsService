@@ -16,4 +16,10 @@ export const kafkaBrokers = process.env.KAFKA_BROKER?.split(",") ?? [
 ];
 
 //the second - rocket event source - polling request
-export const rocketEventUrl = process.env.ROCKET_EVENT_SOURCE_URL ?? "example url";
+export const rocketEventUrl =
+  process.env.ROCKET_EVENT_SOURCE_URL ?? "example url";
+
+export const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
+export const redisPblishChannel =
+  process.env.REDIS_PUBLISH_CHANNEL ?? "REDIS_TEST";
+export const croneTime = process.env.CRONE_TIME ?? "*/5 * * * * *"; // cronTime every 5 second
