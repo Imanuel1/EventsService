@@ -5,7 +5,11 @@ import ConsumerFactory from "./kafkaConsumer";
 import ProducerFactory from "./kafkaProducer";
 import { updateRedisData } from "../redis/redis";
 import { parseEventMessage } from "../utils/utils";
-import { GeneralEventSource } from "../types/generalEvent.type";
+import {
+  GeneralEventSource,
+  GeneralEventType,
+} from "../types/generalEvent.type";
+import { EventModel } from "../models/event";
 
 export const kafka = new Kafka({
   logLevel: logLevel.INFO,
@@ -35,7 +39,13 @@ export const kafkaInit = async () => {
 
       //update Redis - key define by this logic - <subject>:<subjectId>
       updateRedisData(`event:${eventId}`, stringifyEvent);
+
       //update mongoDb
+      await EventModel.findOneAndUpdate(
+        { eventId },
+        JSON.parse(stringifyEvent) as GeneralEventType,
+        { upsert: true }
+      );
     }
   );
 
@@ -57,6 +67,11 @@ export const kafkaInit = async () => {
       updateRedisData(`event:${eventId}`, stringifyEvent);
 
       //update mongoDb
+      await EventModel.findOneAndUpdate(
+        { eventId },
+        JSON.parse(stringifyEvent) as GeneralEventType,
+        { upsert: true }
+      );
     }
   );
 

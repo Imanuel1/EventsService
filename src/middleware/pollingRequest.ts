@@ -2,8 +2,9 @@ import axios from "axios";
 import { CronJob } from "cron";
 import { croneTime, rocketEventUrl } from "../environment";
 import { updateRedisData } from "../redis/redis";
-import { GeneralEventSource } from "../types/generalEvent.type";
+import { GeneralEventSource, GeneralEventType } from "../types/generalEvent.type";
 import { parseEventMessage } from "../utils/utils";
+import { EventModel } from "../models/event";
 
 // event type - GeneralEventSource.ALERT_COMPANY
 const getEvent = async () => {
@@ -14,15 +15,27 @@ const getEvent = async () => {
 
     if (!data) return; // not save the data if empty
 
-    //parse event data to general structure!!
-    const { eventId, stringifyEvent } = parseEventMessage[
-      GeneralEventSource.ALERT_COMPANY
-    ](JSON.stringify(data));
+    //handle array of event and single event - using upsert
+    const eventArray = Array.isArray(data) ? data : [data];
 
-    //update Redis - key define by this logic - <subject>:<subjectId>
-    updateRedisData(`event:${eventId}`, stringifyEvent);
+    await Promise.all(eventArray.map( async (event) => {
+        //parse event data to general structure!!
+        const { eventId, stringifyEvent } = parseEventMessage[
+          GeneralEventSource.ALERT_COMPANY
+        ](JSON.stringify(event));
+    
+        //update Redis - key define by this logic - <subject>:<subjectId>
+        await updateRedisData(`event:${eventId}`, stringifyEvent);
+    
+        //save the data in mongoDb
+        await EventModel.findOneAndUpdate(
+            { eventId },
+            event as GeneralEventType,
+            { upsert: true }
+          );
 
-    //TODO:save the data in mongoDb
+    }))
+
   } catch (error) {
     console.error("getEvent error :", error);
   }
