@@ -19,11 +19,11 @@ services:
   redis:
     container_name: redis
     image: "redis/redis-stack:edge"
-    restart: always
+    # restart: always
     ports:
       - 6379:6379
       - 8001:8001
-    command: ["redis-server", "--notify-keyspace-events", "Ksg"]
+    # command: ["redis-server", "--notify-keyspace-events", "Ksg"]
     environment:
       REDIS_ARGS: "--notify-keyspace-events Ksg"
     deploy:
@@ -39,20 +39,26 @@ services:
     links:
       - zookeeper
     environment:
-      KAFKA_BROKERS: event1,event2
+      # KAFKA_BROKERS: kafka:9092
+      # KAFKA_BROKER_ID: 1
+      # KAFKA_LISTENERS: PLAINTEXT://:9092
+      # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      # KAFKA_ADVERTISED_HOST_NAME: ${HOST_IP}
+      # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_BROKER_ID: 1
-      KAFKA_LISTENERS: PLAINTEXT://:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_ADVERTISED_HOST_NAME: ${HOST_IP}
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    depends_on:
-      - zookeeper
-
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
   # Zookeeper for Kafka
   zookeeper:
     container_name: zookeeper
     image: wurstmeister/zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
   # MongoDB

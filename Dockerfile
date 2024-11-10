@@ -1,6 +1,10 @@
 # Use Node.js base image
 FROM node:18
 
+# Set environment variable for the host IP during build
+RUN export HOST_IP=$(ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $2 }' | cut -f2 -d: | head -n1) && \
+    echo "HOST_IP=${HOST_IP}"
+
 # Set the working directory
 WORKDIR /app
 

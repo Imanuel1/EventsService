@@ -1,4 +1,4 @@
-import { containsOperation } from './../node_modules/sift/src/core';
+import { containsOperation } from "./../node_modules/sift/src/core";
 import { ConnectionOptions } from "./../node_modules/mongodb/src/cmap/connection";
 import dotenv from "dotenv";
 import ip from "ip";
@@ -14,7 +14,7 @@ export const eventTopic2 = process.env.EVENT_TOPIC_2 ?? "event2";
 
 //the env should be like this "host:9090,host:9091,host:9092"
 export const kafkaBrokers = process.env.KAFKA_BROKERS?.split(",") ?? [
-  "localhost:9090",
+  "localhost:9092",
   "localhost:9091",
 ];
 
@@ -29,8 +29,8 @@ export const croneTime = process.env.CRONE_TIME ?? "*/5 * * * * *"; // cronTime 
 
 export const mongoUser = process.env.MONGO_USER || "";
 export const mongoPass = process.env.MONGO_PASS || "";
-export const mongoUrl = process.env.MONGO_URL || "";
-export const mongoDb = process.env.MONGO_DB || "";
+export const mongoUrl = process.env.MONGO_URL || "localhost:27017";
+export const mongoDb = process.env.MONGO_DB || "event";
 export const mongoOption: mongoose.ConnectOptions = {
   retryWrites: true,
   w: "majority",
@@ -42,7 +42,9 @@ export const mongo = {
   mongoDb,
   mongoUrl,
   mongoOption,
-  mongoConnection: `mongodb+srv://${mongoUser}:${mongoPass}@${mongoUrl}/${mongoDb}`,
+  mongoConnection:
+    `mongodb://${mongoUrl}/${mongoDb}` ||
+    `mongodb://${mongoUser}:${mongoPass}@${mongoUrl}/${mongoDb}`,
 };
 
 export const connectToMongo = async () => {
@@ -57,12 +59,11 @@ export const connectToMongo = async () => {
   }
 };
 
-
 // build container
 // docker-compose build
 
 //run container
-// docker-compose up
+// docker-compose up -d
 
 //build and up
 //docker-compose up --build
@@ -78,5 +79,3 @@ export const connectToMongo = async () => {
 
 //remove docker cache issue
 //docker build --no-cache -t your-image-name .
-
-
