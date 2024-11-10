@@ -3,6 +3,6 @@ import { postEvent } from "../conrollers/eventController";
 
 const router = express.Router();
 
-router.route("/event").post(postEvent);
+router.post("/event", postEvent);
 
 export default router;

@@ -1,0 +1,70 @@
+version: "3.9"
+services:
+  # Node.js Service
+  event-service:
+    container_name: event-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000 # Expose API port
+    depends_on:
+      - redis
+      - kafka
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BROKER: kafka:9092
+  # Redis Service
+  redis:
+    container_name: redis
+    image: "redis/redis-stack:edge"
+    restart: always
+    ports:
+      - 6379:6379
+      - 8001:8001
+    command: ["redis-server", "--notify-keyspace-events", "Ksg"]
+    environment:
+      REDIS_ARGS: "--notify-keyspace-events Ksg"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  # Kafka Service
+  kafka:
+    container_name: kafka
+    image: wurstmeister/kafka:2.11-1.1.1
+    ports:
+      - "9092:9092"
+    links:
+      - zookeeper
+    environment:
+      KAFKA_BROKERS: event1,event2
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ADVERTISED_HOST_NAME: ${HOST_IP}
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  # Zookeeper for Kafka
+  zookeeper:
+    container_name: zookeeper
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+  # MongoDB
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+volumes:
+  mongo-data:

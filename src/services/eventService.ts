@@ -18,8 +18,8 @@ export const insertEvent = async (body: {
   console.log(
     `insertEvent :${body}, source ${body.source}, with data ${body.value}`
   );
-
-  if (!body.value) return; // not save the data if empty
+// not save the data if empty
+  if (!body.value) return; 
 
   //handle array of event and single event - using upsert
   const eventArray = Array.isArray(body.value) ? body.value : [body.value];

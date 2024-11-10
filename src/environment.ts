@@ -1,3 +1,4 @@
+import { containsOperation } from './../node_modules/sift/src/core';
 import { ConnectionOptions } from "./../node_modules/mongodb/src/cmap/connection";
 import dotenv from "dotenv";
 import ip from "ip";
@@ -12,7 +13,7 @@ export const eventTopic1 = process.env.EVENT_TOPIC_1 ?? "event1";
 export const eventTopic2 = process.env.EVENT_TOPIC_2 ?? "event2";
 
 //the env should be like this "host:9090,host:9091,host:9092"
-export const kafkaBrokers = process.env.KAFKA_BROKER?.split(",") ?? [
+export const kafkaBrokers = process.env.KAFKA_BROKERS?.split(",") ?? [
   "localhost:9090",
   "localhost:9091",
 ];
@@ -55,3 +56,27 @@ export const connectToMongo = async () => {
     console.error("Error connect to mongo :", error);
   }
 };
+
+
+// build container
+// docker-compose build
+
+//run container
+// docker-compose up
+
+//build and up
+//docker-compose up --build
+
+//logs
+//docker-compose logs -f
+
+// rebuild containers after changes
+// docker-compose up --build
+
+// stop containers
+// docker-compose down
+
+//remove docker cache issue
+//docker build --no-cache -t your-image-name .
+
+
