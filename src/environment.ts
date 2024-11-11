@@ -3,6 +3,9 @@ import { ConnectionOptions } from "./../node_modules/mongodb/src/cmap/connection
 import dotenv from "dotenv";
 import ip from "ip";
 import mongoose from "mongoose";
+import { pollingRequestsSetUp } from "./middleware/pollingRequest";
+import { kafkaInit } from "./kafka/kafka";
+import { redisSetUp } from "./redis/redis";
 dotenv.config();
 
 export const port = process.env.PORT;
@@ -43,7 +46,7 @@ export const mongo = {
   mongoUrl,
   mongoOption,
   mongoConnection:
-    `mongodb://${mongoUrl}/${mongoDb}` ||
+    // `mongodb://${mongoUrl}/${mongoDb}` ||
     `mongodb://${mongoUser}:${mongoPass}@${mongoUrl}/${mongoDb}`,
 };
 
@@ -57,6 +60,13 @@ export const connectToMongo = async () => {
   } catch (error) {
     console.error("Error connect to mongo :", error);
   }
+};
+
+export const servicesSetUp = () => {
+  pollingRequestsSetUp();
+  kafkaInit().catch(console.error);
+  redisSetUp();
+  connectToMongo();
 };
 
 // build container

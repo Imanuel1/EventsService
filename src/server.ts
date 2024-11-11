@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { connectToMongo, port } from "./environment";
+import { connectToMongo, port, servicesSetUp } from "./environment";
 import { kafkaInit } from "./kafka/kafka";
 import { requestLog } from "./middleware/requestLog";
 import router from "./routes/router";
@@ -17,8 +17,6 @@ app
   .use("/api", router)
   .use(errorHandler)
   .listen(port, () => {
-    connectToMongo();
-    // pollingRequestsSetUp();
-    kafkaInit().catch(console.error);
+    servicesSetUp();
     console.log(`Server is running op port ${port}`);
   });
