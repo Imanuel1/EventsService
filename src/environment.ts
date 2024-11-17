@@ -33,6 +33,7 @@ export const croneTime = process.env.CRONE_TIME ?? "*/5 * * * * *"; // cronTime 
 export const mongoUser = process.env.MONGO_USER || "";
 export const mongoPass = process.env.MONGO_PASS || "";
 export const mongoUrl = process.env.MONGO_URL || "localhost:27017";
+export const mongoParams = process.env.MONGO_PARAMS || "?authSource=admin";
 export const mongoDb = process.env.MONGO_DB || "event";
 export const mongoOption: mongoose.ConnectOptions = {
   retryWrites: true,
@@ -45,9 +46,7 @@ export const mongo = {
   mongoDb,
   mongoUrl,
   mongoOption,
-  mongoConnection:
-    // `mongodb://${mongoUrl}/${mongoDb}` ||
-    `mongodb://${mongoUser}:${mongoPass}@${mongoUrl}/${mongoDb}`,
+  mongoConnection: `mongodb://${mongoUser}:${mongoPass}@${mongoUrl}/${mongoDb}${mongoParams}`,
 };
 
 export const connectToMongo = async () => {
@@ -56,7 +55,7 @@ export const connectToMongo = async () => {
       mongo.mongoConnection,
       mongoOption
     );
-    console.log("connect to mongo db: ", connection.version);
+    console.log("connected to mongodb, version:", connection.version);
   } catch (error) {
     console.error("Error connect to mongo :", error);
   }
